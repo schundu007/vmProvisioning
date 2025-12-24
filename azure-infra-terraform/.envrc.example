@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+#===============================================================================
+# Environment Configuration Template
+# Copy to .envrc and populate with your values
+# 
+# SECURITY: Never commit .envrc with real values to version control!
+#           Use .envrc.example as a template only.
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# Project Configuration
+#-------------------------------------------------------------------------------
+export ENVIRONMENT="dev"                          # dev, staging, prod
+export PROJECT_PREFIX="myapp"                     # Your project name
+export UNIQUE="${PROJECT_PREFIX}-${ENVIRONMENT}"
+
+#-------------------------------------------------------------------------------
+# Azure Authentication
+# Get these from: az account show
+#-------------------------------------------------------------------------------
+export ARM_TENANT_ID=""                           # az account show --query tenantId -o tsv
+export ARM_SUBSCRIPTION_ID=""                     # az account show --query id -o tsv
+
+#-------------------------------------------------------------------------------
+# Service Principal for Terraform
+# Create with: ./scripts/create-service-principal.sh
+# Or manually: az ad sp create-for-rbac --name "tf-${UNIQUE}" --role Contributor
+#-------------------------------------------------------------------------------
+export ARM_CLIENT_ID=""                           # Service Principal App ID
+export ARM_CLIENT_SECRET=""                       # Service Principal Password
+
+#-------------------------------------------------------------------------------
+# Terraform State Backend
+# Created by: ./scripts/init-backend.sh
+#-------------------------------------------------------------------------------
+export TF_VAR_remote_state_account=""             # Storage account name
+export TF_VAR_remote_state_container="tfstate"    # Container name
+export ARM_ACCESS_KEY=""                          # Storage account key (or use Azure AD auth)
+
+#-------------------------------------------------------------------------------
+# Key Vault (Optional)
+# For centralized secret management
+#-------------------------------------------------------------------------------
+export COMMON_VAULT="${PROJECT_PREFIX}${ENVIRONMENT}kv"
+
+#-------------------------------------------------------------------------------
+# Resource Locations
+#-------------------------------------------------------------------------------
+export TF_VAR_resource_group_location="eastus"
+export TF_VAR_secondary_location="westus"         # For DR/backup
+
+#-------------------------------------------------------------------------------
+# Terraform Workspace Names
+#-------------------------------------------------------------------------------
+export TF_VAR_central_resources_workspace_name="central-${ENVIRONMENT}"
+export TF_VAR_network_workspace_name="network-${ENVIRONMENT}"
+export TF_VAR_compute_workspace_name="compute-${ENVIRONMENT}"
+export TF_VAR_monitoring_workspace_name="monitoring-${ENVIRONMENT}"
+
+#-------------------------------------------------------------------------------
+# SSH Keys (Optional)
+# Generate with: ssh-keygen -t ed25519 -f ~/.ssh/${UNIQUE}-key
+#-------------------------------------------------------------------------------
+export TF_VAR_ssh_public_key_file="~/.ssh/${UNIQUE}-key.pub"
+export TF_VAR_ssh_private_key_file="~/.ssh/${UNIQUE}-key"
+
+#-------------------------------------------------------------------------------
+# Git Configuration (Optional - for GitOps)
+#-------------------------------------------------------------------------------
+export TF_VAR_gitops_ssh_url=""                   # git@github.com:org/repo.git
+export TF_VAR_gitops_branch="${ENVIRONMENT}"
+
+#===============================================================================
+# INSTRUCTIONS
+#===============================================================================
+# 1. Copy this file:
+#    cp .envrc.example .envrc
+#
+# 2. Install direnv (recommended):
+#    brew install direnv   # macOS
+#    apt install direnv    # Ubuntu
+#
+# 3. Allow direnv in this directory:
+#    direnv allow
+#
+# 4. Populate values using Azure CLI:
+#    # Login
+#    az login
+#    
+#    # Get Tenant and Subscription IDs
+#    az account show --query '{tenant:tenantId, subscription:id}' -o table
+#    
+#    # Create Service Principal (saves output to use)
+#    az ad sp create-for-rbac --name "tf-${UNIQUE}" --role Contributor \
+#      --scopes /subscriptions/${ARM_SUBSCRIPTION_ID} \
+#      --query '{client_id:appId, client_secret:password}' -o table
+#
+# 5. Alternative: Use Azure CLI authentication (no service principal needed)
+#    Uncomment the line below and remove ARM_CLIENT_* variables:
+#    # export ARM_USE_CLI=true
+#
+# 6. For CI/CD, use Azure Key Vault or GitHub Secrets instead of .envrc
+#===============================================================================
