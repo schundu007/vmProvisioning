@@ -57,18 +57,7 @@ az login
 az account set --subscription "YOUR_SUBSCRIPTION_ID"
 ```
 
-### 2. Setup Environment
-
-```bash
-# Option A: Automatic setup (recommended)
-./scripts/setup-environment.sh -e dev -p myproject
-
-# Option B: Manual setup
-cp .envrc.example .envrc
-# Edit .envrc with your Azure credentials
-```
-
-### 3. Initialize Backend
+### 2. Initialize Backend
 
 ```bash
 # Create Terraform state backend
@@ -166,32 +155,14 @@ module "monitoring" {
 
 ## ⚙️ Configuration
 
-### Environment Setup
-
-The project uses `.envrc` for environment configuration with [direnv](https://direnv.net/):
-
-```bash
-# Install direnv
-brew install direnv  # macOS
-apt install direnv   # Ubuntu
-
-# Setup environment (creates .envrc with Azure credentials)
-./scripts/setup-environment.sh -e dev -p myproject
-
-# Allow direnv
-direnv allow
-```
-
-**⚠️ Security Note:** `.envrc` contains secrets and is excluded from git. Never commit credentials!
-
 ### Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `prefix` | Resource naming prefix | `myapp` |
+| Variable | Description | Example                 |
+|----------|-------------|---------                |
+| `prefix` | Resource naming prefix | `myapp`      |
 | `environment` | Environment name | `dev`, `prod` |
-| `location` | Azure region | `eastus` |
-| `address_space` | VNet CIDR | `10.0.0.0/16` |
+| `location` | Azure region | `eastus`             |
+| `address_space` | VNet CIDR | `10.0.0.0/16`      |
 
 ### Sample terraform.tfvars
 
@@ -224,23 +195,23 @@ tags = {
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Resource Group                        │
-├─────────────────────────────────────────────────────────┤
+┌────────────────────────────────────────────────────────┐
+│                    Resource Group                      │
+├────────────────────────────────────────────────────────┤
 │  ┌─────────────────────────────────────────────────┐   │
-│  │                 Virtual Network                  │   │
-│  │  ┌─────────────┐      ┌─────────────┐          │   │
-│  │  │  Public     │      │  Private    │          │   │
-│  │  │  Subnets    │      │  Subnets    │          │   │
-│  │  │  (NAT GW)   │      │  (VMs)      │          │   │
-│  │  └─────────────┘      └─────────────┘          │   │
+│  │                 Virtual Network                 │   │
+│  │  ┌─────────────┐      ┌─────────────┐           │   │
+│  │  │  Public     │      │  Private    │           │   │
+│  │  │  Subnets    │      │  Subnets    │           │   │
+│  │  │  (NAT GW)   │      │  (VMs)      │           │   │
+│  │  └─────────────┘      └─────────────┘           │   │
 │  └─────────────────────────────────────────────────┘   │
-│                         │                               │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐             │
-│  │ Linux VM │  │ Key Vault│  │ Log      │             │
-│  │ + Backup │  │          │  │ Analytics│             │
-│  └──────────┘  └──────────┘  └──────────┘             │
-└─────────────────────────────────────────────────────────┘
+│                         │                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
+│  │ Linux VM │  │ Key Vault│  │ Log      │              │
+│  │ + Backup │  │          │  │ Analytics│              │
+│  └──────────┘  └──────────┘  └──────────┘              │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -249,23 +220,23 @@ tags = {
 
 ### Network Module
 
-| Output | Description |
-|--------|-------------|
-| `vnet_id` | Virtual Network ID |
-| `vnet_name` | Virtual Network name |
-| `public_subnet_ids` | List of public subnet IDs |
-| `private_subnet_ids` | List of private subnet IDs |
-| `nsg_id` | Network Security Group ID |
+| Output | Description                                 |
+|--------|-------------                                |
+| `vnet_id` | Virtual Network ID                       |
+| `vnet_name` | Virtual Network name                   |
+| `public_subnet_ids` | List of public subnet IDs      |
+| `private_subnet_ids` | List of private subnet IDs    |
+| `nsg_id` | Network Security Group ID                 |
 
 ### Linux VM Module
 
-| Output | Description |
-|--------|-------------|
-| `vm_id` | Virtual Machine ID |
-| `vm_name` | Virtual Machine name |
-| `private_ip` | Private IP address |
-| `public_ip` | Public IP address (if enabled) |
-| `identity_principal_id` | Managed Identity principal ID |
+| Output | Description                                     |
+|--------|-------------                                    |
+| `vm_id` | Virtual Machine ID                             |
+| `vm_name` | Virtual Machine name                         |
+| `private_ip` | Private IP address                        |
+| `public_ip` | Public IP address (if enabled)             |
+| `identity_principal_id` | Managed Identity principal ID  |
 
 ---
 
